@@ -15,10 +15,10 @@ root.render(
   <React.StrictMode>
     <HashRouter>
       <Auth0Provider
-        domain={(import.meta.env as any).VITE_AUTH0_DOMAIN}
-        clientId={(import.meta.env as any).VITE_AUTH0_CLIENT_ID}
+        domain="dev-jhcgj3g4mlqihji6.us.auth0.com"
+        clientId="9Go6lFNJ3U2Et18YjhXgSnNZqldCpDXj"
         authorizationParams={{
-          redirect_uri: (import.meta.env as any).VITE_AUTH0_LOGIN_REDIRECT_URL,
+          redirect_uri: window.location.origin,
         }}
       >
         <App />
