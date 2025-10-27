@@ -18,14 +18,10 @@ root.render(
         domain="dev-jhcgj3g4mlqihji6.us.auth0.com"
         clientId="9Go6lFNJ3U2Et18YjhXgSnNZqldCpDXj"
         authorizationParams={{
-          redirect_uri: window.location.origin + '/build',
+          redirect_uri: window.location.origin,
         }}
         useRefreshTokens={true}
         cacheLocation="localstorage"
-        onRedirectCallback={(appState) => {
-          // Redirect to build page after successful auth
-          window.location.href = window.location.origin + '/build';
-        }}
       >
         <App />
       </Auth0Provider>
