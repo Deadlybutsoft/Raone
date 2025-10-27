@@ -571,7 +571,7 @@ export const useChat = (
 
       try {
         const streamPromise = (async () => {
-            const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY })
+            const ai = new GoogleGenAI({ apiKey: "AIzaSyB1HO26iQJFOEh4LT-HrPW0HtejIwFae4VU" })
             const chatHistory = buildGeminiHistory(messages)
             
             const promptParts: Part[] = imagesForNextTurn.map(image => ({
