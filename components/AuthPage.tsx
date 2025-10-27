@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleIcon, XIcon } from './icons';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface AuthPageProps {
   onClose: () => void;
@@ -8,7 +9,8 @@ interface AuthPageProps {
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onClose, onTryDemo }) => {
   const [isVisible, setIsVisible] = useState(false);
-  
+  const { loginWithRedirect, isLoading, error } = useAuth0();
+
   useEffect(() => {
     setIsVisible(true);
   }, []);
@@ -18,13 +20,12 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onClose, onTryDemo }) => {
     setTimeout(onClose, 300);
   };
 
-  const handleLoginSuccess = () => {
-    onTryDemo();
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleLoginSuccess();
+  const handleLogin = () => {
+    loginWithRedirect({
+      appState: {
+        returnTo: window.location.pathname,
+      },
+    });
   };
 
   return (
@@ -57,12 +58,20 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onClose, onTryDemo }) => {
                 <h2 className="text-3xl font-bold mb-4">Get Started</h2>
 
                 <button
-                  onClick={handleLoginSuccess}
-                  className="w-full flex items-center justify-center gap-3 bg-white/10 border border-white/20 py-3 rounded-lg hover:bg-white/20 transition-colors mb-4"
+                  onClick={handleLogin}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-3 bg-white/10 border border-white/20 py-3 rounded-lg hover:bg-white/20 transition-colors mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <GoogleIcon className="h-5 w-5" />
-                  <span className="font-semibold text-sm">Continue with Google</span>
+                  <span className="font-semibold text-sm">
+                    {isLoading ? 'Signing in...' : 'Continue with Google'}
+                  </span>
                 </button>
+                {error && (
+                  <div className="text-red-400 text-sm text-center">
+                    Error: {error.message}
+                  </div>
+                )}
             </div>
         </div>
       </div>

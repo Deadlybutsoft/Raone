@@ -3,6 +3,7 @@
 import type React from "react"
 import { useState, useCallback, useEffect } from "react"
 import { Routes, Route, useNavigate } from "react-router-dom"
+import { useAuth0 } from "@auth0/auth0-react"
 import { Header } from "./components/Header"
 import { SideDrawer } from "./components/SideDrawer"
 import { ChatPanel } from "./components/ChatPanel"
@@ -473,16 +474,38 @@ const Workspace: React.FC = () => {
 
 const App: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated, isLoading } = useAuth0();
+
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      // Redirect authenticated users to workspace
+      navigate('/w');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
 
   const handleLaunchWorkspace = useCallback((prompt?: string, image?: File | null) => {
-      initialPromptForWorkspace = prompt;
-      initialImagesForWorkspace = image ? [image] : [];
-      navigate('/w');
+      if (isAuthenticated) {
+        initialPromptForWorkspace = prompt;
+        initialImagesForWorkspace = image ? [image] : [];
+        navigate('/w');
+      }
+  }, [isAuthenticated, navigate]);
+
+  const handleAuthSuccess = useCallback(() => {
+    navigate('/w');
   }, [navigate]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <Routes>
-      <Route path="/w/*" element={<Workspace />} />
+      <Route path="/w/*" element={isAuthenticated ? <Workspace /> : <HomePage onLaunchWorkspace={() => navigate('/')} />} />
       <Route path="/*" element={<HomePage onLaunchWorkspace={handleLaunchWorkspace} />} />
     </Routes>
   );

@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.8.0",
     "@codesandbox/sandpack-react": "^2.13.0",
     "@codesandbox/sandpack-themes": "^2.0.21",
     "@google/genai": "^0.12.0",
