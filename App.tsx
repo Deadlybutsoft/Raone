@@ -477,9 +477,15 @@ const App: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth0();
 
   useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      // Redirect authenticated users to workspace
-      navigate('/w');
+    if (!isLoading) {
+      // Only redirect if authenticated and not already on workspace routes
+      if (isAuthenticated && !window.location.pathname.startsWith('/w')) {
+        navigate('/w');
+      }
+      // If not authenticated and on protected routes, redirect to home
+      if (!isAuthenticated && window.location.pathname.startsWith('/w')) {
+        navigate('/');
+      }
     }
   }, [isAuthenticated, isLoading, navigate]);
 
@@ -495,6 +501,7 @@ const App: React.FC = () => {
     navigate('/w');
   }, [navigate]);
 
+  // Show loading while checking authentication
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
