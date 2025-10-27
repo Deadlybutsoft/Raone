@@ -571,7 +571,7 @@ export const useChat = (
 
       try {
         const streamPromise = (async () => {
-            const apiKey = 'AIzaSyB1HO26iQJFOEh4LT-HrPW0HtejIwFae4VU';
+            const apiKey = 'AIzaSyDhgZ2LhGbB8uKohjHPzIp79TJg8YHERA0';
             if (!apiKey) {
               throw new Error('Gemini API key is not configured.');
             }
