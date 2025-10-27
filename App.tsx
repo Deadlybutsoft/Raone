@@ -478,13 +478,15 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (!isLoading) {
-      // Only redirect if authenticated and not already on workspace routes
-      if (isAuthenticated && !window.location.pathname.startsWith('/w')) {
-        navigate('/w');
+      // Only redirect if authenticated and not already on build routes
+      if (isAuthenticated && window.location.pathname === '/') {
+        navigate('/build');
+      } else if (isAuthenticated && !window.location.pathname.startsWith('/build')) {
+        navigate('/build');
       }
       // If not authenticated and on protected routes, redirect to home
-      if (!isAuthenticated && window.location.pathname.startsWith('/w')) {
-        navigate('/');
+      if (!isAuthenticated && window.location.pathname.startsWith('/build')) {
+        navigate('/home');
       }
     }
   }, [isAuthenticated, isLoading, navigate]);
@@ -493,12 +495,12 @@ const App: React.FC = () => {
       if (isAuthenticated) {
         initialPromptForWorkspace = prompt;
         initialImagesForWorkspace = image ? [image] : [];
-        navigate('/w');
+        navigate('/build');
       }
   }, [isAuthenticated, navigate]);
 
   const handleAuthSuccess = useCallback(() => {
-    navigate('/w');
+    navigate('/build');
   }, [navigate]);
 
   // Show loading while checking authentication
@@ -512,8 +514,9 @@ const App: React.FC = () => {
 
   return (
     <Routes>
-      <Route path="/w/*" element={isAuthenticated ? <Workspace /> : <HomePage onLaunchWorkspace={() => navigate('/')} />} />
-      <Route path="/*" element={<HomePage onLaunchWorkspace={handleLaunchWorkspace} />} />
+      <Route path="/home" element={<HomePage onLaunchWorkspace={handleLaunchWorkspace} />} />
+      <Route path="/build/*" element={isAuthenticated ? <Workspace /> : <HomePage onLaunchWorkspace={() => navigate('/home')} />} />
+      <Route path="/" element={<HomePage onLaunchWorkspace={handleLaunchWorkspace} />} />
     </Routes>
   );
 };
