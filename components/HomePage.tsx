@@ -73,6 +73,13 @@ export const HomePage: React.FC<HomePageProps> = ({ onLaunchWorkspace }) => {
     setIsAuthOpen(true);
   }
 
+  const handleLearnMore = () => {
+    const element = document.getElementById('what-is-raone');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   return (
     <div 
       className={`text-white bg-black transition-opacity duration-500 ${isExiting ? 'opacity-0' : 'opacity-100'}`}
@@ -126,12 +133,11 @@ export const HomePage: React.FC<HomePageProps> = ({ onLaunchWorkspace }) => {
                             >
                                 <span>Get Started</span>
                             </button>
-                             <button
-                                onClick={handleLaunchDemo}
-                                className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-black text-white rounded-full hover:bg-zinc-800 border border-zinc-700 transition-colors font-semibold text-lg"
+                            <button
+                                onClick={handleLearnMore}
+                                className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-zinc-800 text-white rounded-full hover:bg-zinc-700 border border-zinc-600 transition-colors font-semibold text-lg"
                             >
-                                <span>Launch Workspace</span>
-                                <ArrowRightIcon className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                                <span>Learn More</span>
                             </button>
                         </div>
                     </div>
@@ -139,7 +145,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onLaunchWorkspace }) => {
             </section>
             
             {/* Section 2: What is Raone? */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden border-t-8 border-black animated-cubes-bg">
+            <section id="what-is-raone" className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden border-t-8 border-black animated-cubes-bg">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vw] max-w-4xl max-h-4xl bg-purple-600/20 rounded-full filter blur-3xl animate-background-blob opacity-60"></div>
                 <div className="relative z-10 max-w-4xl mx-auto">
                     <h2 className="text-5xl md:text-6xl font-bold tracking-tight scroll-animate">What is Raone?</h2>
