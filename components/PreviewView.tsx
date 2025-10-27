@@ -396,19 +396,18 @@ const createPreviewableHtml = (
   `;
 
   const scriptToInject = `
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin><\/script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin><\/script>
-    <script src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.development.js" crossorigin><\/script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"><\/script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script>
       ${loaderScript}
-    <\/script>
+    </script>
     <script>
       ${selectorScript}
-    <\/script>
+    </script>
     <script>
       ${snapshotScript}
-    <\/script>
+    </script>
   `;
   
   if (!htmlContent.includes('id="root"')) {
