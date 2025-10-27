@@ -1,0 +1,261 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { StopIcon, PlusIcon, CloseIcon, ArrowRightIcon, CreatorKitIcon, PhotoIcon, CheckIcon, CpuChipIcon, CursorArrowIcon, CameraIcon } from './icons/index';
+import { AiStatus } from '../types';
+import { CreatorKit } from './creator-kit/CreatorKit';
+
+interface ChatInputProps {
+  onSendMessage: (prompt: string, images: File[]) => void;
+  aiStatus: AiStatus;
+  stopGeneration: () => void;
+  isSelectMode: boolean;
+  onToggleSelectMode: () => void;
+  selectedSelectors: string[];
+  onRemoveSelector: (selector: string) => void;
+  onTakeSnapshot: () => void;
+  imageToAttach: File | null;
+  onImageAttached: () => void;
+  onImageSelectedForEditing: (dataUrl: string) => void;
+}
+
+const fileToUrl = (file: File): Promise<string> => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target?.result as string);
+    reader.readAsDataURL(file);
+  });
+};
+
+export const ChatInput: React.FC<ChatInputProps> = ({ 
+    onSendMessage, 
+    aiStatus, 
+    stopGeneration,
+    isSelectMode,
+    onToggleSelectMode,
+    selectedSelectors,
+    onRemoveSelector,
+    onTakeSnapshot,
+    imageToAttach,
+    onImageAttached,
+    onImageSelectedForEditing,
+}) => {
+  const [prompt, setPrompt] = useState('');
+  const [images, setImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  
+  const [isAddMenuOpen, setAddMenuOpen] = useState(false);
+  const [isCreatorKitOpen, setCreatorKitOpen] = useState(false);
+  
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+  const kitPopoverRef = useRef<HTMLDivElement>(null);
+  const kitButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (imageToAttach) {
+      const handleAttach = async () => {
+        const newPreview = await fileToUrl(imageToAttach);
+        setImages(prev => [...prev, imageToAttach]);
+        setImagePreviews(prev => [...prev, newPreview]);
+        onImageAttached();
+      };
+      handleAttach();
+    }
+  }, [imageToAttach, onImageAttached]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (addMenuRef.current && !addMenuRef.current.contains(target)) {
+        setAddMenuOpen(false);
+      }
+      if (kitPopoverRef.current && !kitPopoverRef.current.contains(target) && kitButtonRef.current && !kitButtonRef.current.contains(target)) {
+        setCreatorKitOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const animationFrameId = requestAnimationFrame(() => {
+        textarea.style.height = 'auto';
+        const scrollHeight = textarea.scrollHeight;
+        const maxHeight = 200;
+        textarea.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
+      });
+      return () => cancelAnimationFrame(animationFrameId);
+    }
+  }, [prompt]);
+
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(URL.revokeObjectURL);
+    };
+  }, [imagePreviews]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          onImageSelectedForEditing(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+    if (e.target) e.target.value = '';
+  };
+  
+  const handleRemoveImage = (indexToRemove: number) => {
+    URL.revokeObjectURL(imagePreviews[indexToRemove]);
+    setImages(prev => prev.filter((_, i) => i !== indexToRemove));
+    setImagePreviews(prev => prev.filter((_, i) => i !== indexToRemove));
+  };
+
+  const isGenerating = aiStatus === 'thinking' || aiStatus === 'streaming';
+
+  const handleSend = () => {
+    if (isGenerating || (!prompt.trim() && images.length === 0)) return;
+    onSendMessage(prompt, images);
+    setPrompt('');
+    imagePreviews.forEach(URL.revokeObjectURL);
+    setImages([]);
+    setImagePreviews([]);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleAddImagesFromKit = async (files: File[]) => {
+      const newPreviews = await Promise.all(files.map(fileToUrl));
+      setImages(prev => [...prev, ...files]);
+      setImagePreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  return (
+    <div className="relative bg-black border border-zinc-400 flex flex-col text-white rounded-lg">
+      <div ref={kitPopoverRef}>
+        {isCreatorKitOpen && (
+            <CreatorKit 
+                onAddToPrompt={(text) => setPrompt(p => p ? `${p}\n${text}`: text)}
+                onAddImages={handleAddImagesFromKit}
+                onClose={() => setCreatorKitOpen(false)}
+            />
+        )}
+      </div>
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        className="hidden" 
+        accept="image/*"
+      />
+      
+      {selectedSelectors.length > 0 && (
+        <div className="p-3 border-b border-zinc-700">
+            <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-xs font-medium text-zinc-400 flex-shrink-0">Selected:</span>
+                {selectedSelectors.map((selector, index) => (
+                    <div key={index} className="flex items-center gap-1.5 bg-zinc-800 text-zinc-200 text-xs font-mono rounded-full px-2 py-1 max-w-full">
+                        <span className="truncate" title={selector}>{selector}</span>
+                        <button onClick={() => onRemoveSelector(selector)} className="flex-shrink-0 p-0.5 rounded-full hover:bg-zinc-700 transition-colors" aria-label={`Remove selector: ${selector}`}>
+                            <CloseIcon className="w-3 h-3"/>
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </div>
+      )}
+
+      {imagePreviews.length > 0 && (
+        <div className="p-3 border-b border-zinc-700">
+            <div className="flex flex-wrap gap-3">
+            {imagePreviews.map((preview, index) => (
+                <div key={index} className="relative inline-block">
+                    <img src={preview} alt={`Upload preview ${index + 1}`} className="h-24 w-auto max-w-full object-contain rounded-md" />
+                    <button onClick={() => handleRemoveImage(index)} className="absolute -top-2 -right-2 bg-zinc-900/80 hover:bg-zinc-800 text-white p-1 rounded-full transition-all" aria-label="Remove image">
+                        <CloseIcon className="w-4 h-4" />
+                    </button>
+                </div>
+            ))}
+            </div>
+        </div>
+      )}
+
+      <div className="p-4 flex flex-col gap-4">
+        <textarea
+          ref={textareaRef}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Describe what you want to build or change..."
+          className="w-full bg-transparent resize-none focus:outline-none text-xl text-white placeholder:text-zinc-500 max-h-48 scrollbar-thin scrollbar-thumb-zinc-600 scrollbar-track-transparent chat-input break-words"
+          rows={1}
+          disabled={isGenerating}
+        />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div ref={addMenuRef} className="relative">
+              <button onClick={() => setAddMenuOpen(prev => !prev)} className={`w-11 h-11 flex items-center justify-center transition-all duration-300 text-zinc-300 hover:text-white disabled:opacity-50 rounded-md ${isAddMenuOpen ? 'bg-zinc-800' : 'bg-zinc-900 hover:bg-zinc-800 border border-zinc-600'}`} disabled={isGenerating} aria-label={isAddMenuOpen ? 'Close menu' : 'Add content'} title={isAddMenuOpen ? 'Close menu' : 'Add content'}>
+                <PlusIcon className={`h-5 w-5 transition-transform duration-300 ease-in-out ${isAddMenuOpen ? 'rotate-45' : ''}`} />
+              </button>
+              {isAddMenuOpen && (
+                <div className="absolute bottom-full left-0 mb-2 w-56 bg-zinc-950 border border-zinc-800 shadow-2xl z-10 p-1.5 rounded-lg">
+                  <div className="space-y-1">
+                    <button onClick={() => { onTakeSnapshot(); setAddMenuOpen(false); }} className="w-full flex items-center gap-3 px-2 py-1.5 text-sm text-left text-zinc-200 hover:bg-zinc-800 transition-colors rounded-md">
+                      <CameraIcon className="w-4 h-4 text-zinc-400"/>
+                      <span>Snapshot Preview</span>
+                    </button>
+                    <button onClick={() => { fileInputRef.current?.click(); setAddMenuOpen(false); }} className="w-full flex items-center gap-3 px-2 py-1.5 text-sm text-left text-zinc-200 hover:bg-zinc-800 transition-colors rounded-md">
+                      <PhotoIcon className="w-4 h-4 text-zinc-400"/> 
+                      <span>Attach Image</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <button
+                ref={kitButtonRef}
+                onClick={() => setCreatorKitOpen(prev => !prev)}
+                className={`w-11 h-11 flex items-center justify-center transition-all duration-300 text-zinc-300 hover:text-white disabled:opacity-50 rounded-md ${isCreatorKitOpen ? 'bg-zinc-800' : 'bg-zinc-900 hover:bg-zinc-800 border border-zinc-600'}`}
+                disabled={isGenerating}
+                aria-label="Open Creator Kit"
+                title="Creator Kit"
+            >
+                <CreatorKitIcon className="h-6 w-6" />
+            </button>
+            <button
+                onClick={onToggleSelectMode}
+                className={`w-11 h-11 flex items-center justify-center transition-all duration-300 disabled:opacity-50 rounded-md ${isSelectMode ? 'bg-yellow-400 text-black' : 'bg-zinc-900 text-zinc-300 hover:text-white hover:bg-zinc-800 border border-zinc-600'}`}
+                disabled={isGenerating}
+                aria-label="Select element from preview"
+                title="Select element"
+            >
+                <CursorArrowIcon className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="flex items-center">
+            {isGenerating ? (
+              <button onClick={stopGeneration} className="w-11 h-11 flex-shrink-0 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white transition-colors rounded-md" aria-label="Stop generation">
+                 <StopIcon className="h-5 w-5" />
+              </button>
+            ) : (
+              <button onClick={handleSend} disabled={isGenerating || (!prompt.trim() && images.length === 0)} className="w-11 h-11 flex-shrink-0 flex items-center justify-center bg-white text-black transition-colors disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed rounded-md" aria-label="Send message">
+                <ArrowRightIcon className="h-5 w-5" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
