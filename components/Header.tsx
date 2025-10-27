@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MenuIcon, DownloadIcon } from './icons/index';
+import { MenuIcon, DownloadIcon, IntegrationsIcon } from './icons/index';
+import { INTEGRATIONS } from './integrations';
 
 interface HeaderProps {
   projectName: string;
@@ -9,19 +10,24 @@ interface HeaderProps {
   onDownloadZip: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ 
+export const Header: React.FC<HeaderProps> = ({
   projectName,
-  onMenuClick, 
-  onUpgradeClick, 
+  onMenuClick,
+  onUpgradeClick,
   onDownloadZip,
 }) => {
   const [isDownloadMenuOpen, setDownloadMenuOpen] = useState(false);
+  const [isIntegrationsMenuOpen, setIntegrationsMenuOpen] = useState(false);
   const downloadMenuRef = useRef<HTMLDivElement>(null);
+  const integrationsMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (downloadMenuRef.current && !downloadMenuRef.current.contains(event.target as Node)) {
         setDownloadMenuOpen(false);
+      }
+      if (integrationsMenuRef.current && !integrationsMenuRef.current.contains(event.target as Node)) {
+        setIntegrationsMenuOpen(false);
       }
     };
 
@@ -41,6 +47,44 @@ export const Header: React.FC<HeaderProps> = ({
         <span className="text-lg font-medium text-zinc-400 select-none">{projectName}</span>
       </div>
       <div className="flex items-center gap-2">
+        <div className="relative" ref={integrationsMenuRef}>
+            <button
+                onClick={() => setIntegrationsMenuOpen(prev => !prev)}
+                title="Integrations"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-black text-zinc-300 hover:text-white border border-zinc-600 hover:border-zinc-500 transition-colors rounded-md"
+            >
+                <IntegrationsIcon className="h-5 w-5 text-zinc-400" />
+                <span>Integrations</span>
+            </button>
+            {isIntegrationsMenuOpen && (
+                <div className="absolute top-full left-0 mt-2 w-80 bg-black border border-zinc-600 shadow-xl z-20 p-2 rounded-lg">
+                    <div className="space-y-2">
+                        {INTEGRATIONS.map(integration => (
+                            <div
+                                key={integration.id}
+                                className="flex items-start gap-3 p-3 text-sm rounded-md hover:bg-zinc-900 transition-colors cursor-pointer"
+                            >
+                                <integration.icon className="w-6 h-6 text-zinc-400 mt-0.5 flex-shrink-0" />
+                                <div className="flex-1">
+                                    <p className="font-medium text-slate-200">{integration.name}</p>
+                                    <p className="text-xs text-zinc-400 mt-1">{integration.description}</p>
+                                    <a
+                                        href={integration.docsUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-2"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        View Documentation
+                                    </a>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+
         <div className="relative" ref={downloadMenuRef}>
             <button
                 onClick={() => setDownloadMenuOpen(prev => !prev)}

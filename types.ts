@@ -41,7 +41,9 @@ export type AiStatus = 'idle' | 'thinking' | 'streaming';
 
 export type AppTheme = 'light' | 'dark' | 'system';
 
-export type IntegrationType = 
+export type IntegrationType =
+    | 'openai'
+    | 'auth0'
     | 'stripe';
 
 export type SettingsTab = 'account' | 'subscription' | 'memory';
