@@ -583,7 +583,7 @@ export const useChat = (
             }));
             promptParts.unshift({ text: textPromptContent });
 
-            const chat = ai.chats.create({ model: 'gemini-1.5-flash-latest', config: { systemInstruction: AI_SYSTEM_PROMPT }, history: chatHistory });
+            const chat = ai.chats.create({ model: 'gemini-2.5-pro', config: { systemInstruction: AI_SYSTEM_PROMPT }, history: chatHistory });
             const stream = await chat.sendMessageStream({ message: promptParts });
             
             for await (const chunk of stream) {
