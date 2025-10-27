@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import { useAuth0 } from '@auth0/auth0-react';
+import {
     CloseIcon,
     CreditCardIcon,
     UserCircleIcon,
 } from './icons';
-import { 
+import {
     SettingsAccountIcon,
     SettingsMemoryIcon,
 } from './icons/settings-icons';
@@ -43,6 +44,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   initialTab = 'account',
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+  const { user, isAuthenticated, logout } = useAuth0();
 
   const settingsTabs: { id: SettingsTab; label: string; icon: React.FC<{className?: string}> }[] = [
     { id: 'account', label: 'Account', icon: SettingsAccountIcon },
@@ -53,7 +55,51 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const renderContent = () => {
     switch (activeTab) {
       case 'account':
-        return (
+        if (isAuthenticated && user) {
+          return (
+            <>
+                <SettingsHeader title="Account" description="Manage your account details and session." />
+                <SettingsRow title="Account Information" description="Your Google account details.">
+                    <div className="p-6 bg-zinc-950 rounded-lg space-y-4 flex flex-col items-center text-center border border-zinc-800">
+                        <img
+                            src={user.picture || ''}
+                            alt="Profile"
+                            className="w-16 h-16 rounded-full border-2 border-zinc-700"
+                            onError={(e) => {
+                              // Fallback to default avatar if image fails
+                              (e.target as HTMLImageElement).src = '';
+                              (e.target as HTMLImageElement).style.display = 'none';
+                              const parent = (e.target as HTMLElement).parentElement;
+                              if (parent) {
+                                const fallback = document.createElement('div');
+                                fallback.className = 'w-16 h-16 bg-zinc-700 rounded-full flex items-center justify-center';
+                                fallback.innerHTML = '<svg class="w-8 h-8 text-zinc-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.89 1 3 1.89 3 3V7H1V9H3V13H1V15H3V19C3 20.11 3.89 21 5 21H19C20.11 21 21 20.11 21 19V15H23V13H21V9H23V7H21ZM19 19H5V7H19V19Z"/></svg>';
+                                parent.appendChild(fallback);
+                              }
+                            }}
+                        />
+                        <div>
+                            <p className="font-semibold text-xl text-white">{user.name}</p>
+                            <p className="text-sm text-zinc-400 mt-1">{user.email}</p>
+                        </div>
+                        <button
+                            onClick={() => {
+                              logout({
+                                logoutParams: {
+                                  returnTo: window.location.origin,
+                                }
+                              });
+                            }}
+                            className="w-full max-w-xs px-4 py-2.5 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+                        >
+                            Log Out
+                        </button>
+                    </div>
+                </SettingsRow>
+            </>
+          );
+        } else {
+          return (
             <>
                 <SettingsHeader title="Account" description="Manage your account details and session." />
                 <SettingsRow title="Account Status" description="Your work is not saved in demo mode. Please log in to store your projects.">
@@ -65,7 +111,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                                 You are currently in a temporary session.
                             </p>
                         </div>
-                        <button 
+                        <button
                             onClick={onSignOut}
                             className="w-full max-w-xs px-4 py-2.5 text-sm font-semibold bg-white hover:bg-zinc-200 text-black rounded-md transition-colors"
                         >
@@ -74,7 +120,8 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     </div>
                 </SettingsRow>
             </>
-        );
+          );
+        }
       case 'memory':
         return (
             <>
