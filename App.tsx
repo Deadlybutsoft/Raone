@@ -474,48 +474,68 @@ const Workspace: React.FC = () => {
 
 const App: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, isLoading } = useAuth0();
+  const { isAuthenticated, isLoading, user, getAccessTokenSilently } = useAuth0();
+
+  // Store authentication state in localStorage for faster recovery
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      localStorage.setItem('auth0_isAuthenticated', 'true');
+      localStorage.setItem('auth0_user', JSON.stringify(user));
+    } else if (!isLoading) {
+      localStorage.removeItem('auth0_isAuthenticated');
+      localStorage.removeItem('auth0_user');
+    }
+  }, [isAuthenticated, user, isLoading]);
+
+  // Check for stored authentication on mount
+  const [storedAuth, setStoredAuth] = useState<{isAuth: boolean, user: any}>({
+    isAuth: JSON.parse(localStorage.getItem('auth0_isAuthenticated') || 'false'),
+    user: JSON.parse(localStorage.getItem('auth0_user') || 'null')
+  });
 
   useEffect(() => {
+    // Use stored auth for immediate render, then update with Auth0 state
     if (!isLoading) {
-      // Only redirect if authenticated and not already on build routes
-      if (isAuthenticated && window.location.pathname === '/') {
-        navigate('/build');
-      } else if (isAuthenticated && !window.location.pathname.startsWith('/build')) {
+      setStoredAuth({
+        isAuth: isAuthenticated,
+        user: user
+      });
+    }
+  }, [isAuthenticated, user, isLoading]);
+
+  useEffect(() => {
+    // Only redirect if we have definitive auth state
+    if (!isLoading) {
+      // If authenticated and not on protected routes, redirect to build
+      if (storedAuth.isAuth && !window.location.pathname.startsWith('/build')) {
         navigate('/build');
       }
       // If not authenticated and on protected routes, redirect to home
-      if (!isAuthenticated && window.location.pathname.startsWith('/build')) {
+      else if (!storedAuth.isAuth && window.location.pathname.startsWith('/build')) {
         navigate('/home');
       }
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [storedAuth.isAuth, isLoading, navigate]);
 
   const handleLaunchWorkspace = useCallback((prompt?: string, image?: File | null) => {
-      if (isAuthenticated) {
+      if (storedAuth.isAuth) {
         initialPromptForWorkspace = prompt;
         initialImagesForWorkspace = image ? [image] : [];
         navigate('/build');
       }
-  }, [isAuthenticated, navigate]);
+  }, [storedAuth.isAuth, navigate]);
 
   const handleAuthSuccess = useCallback(() => {
     navigate('/build');
   }, [navigate]);
 
-  // Show loading while checking authentication
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
-  }
+  // Use stored auth for faster rendering
+  const shouldShowBuild = storedAuth.isAuth;
 
   return (
     <Routes>
       <Route path="/home" element={<HomePage onLaunchWorkspace={handleLaunchWorkspace} />} />
-      <Route path="/build/*" element={isAuthenticated ? <Workspace /> : <HomePage onLaunchWorkspace={() => navigate('/home')} />} />
+      <Route path="/build/*" element={shouldShowBuild ? <Workspace /> : <HomePage onLaunchWorkspace={() => navigate('/home')} />} />
       <Route path="/" element={<HomePage onLaunchWorkspace={handleLaunchWorkspace} />} />
     </Routes>
   );
