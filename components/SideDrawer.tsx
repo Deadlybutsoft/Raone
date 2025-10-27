@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CloseIcon, CreditCardIcon, SettingsIcon, EllipsisVerticalIcon, PlusIcon, PencilIcon, LinkIcon, TrashIcon } from './icons/index';
+import { CloseIcon, SettingsIcon, EllipsisVerticalIcon, PlusIcon, PencilIcon, LinkIcon, TrashIcon } from './icons/index';
 import { SettingsTab, Project } from '../types';
+import { useAuth0 } from '@auth0/auth0-react';
 
 interface SideDrawerProps {
   isOpen: boolean;
@@ -26,10 +27,11 @@ const NavLink: React.FC<{ onClick?: () => void; href?: string; children: React.R
     return href ? <a href={href} {...commonProps}>{content}</a> : <button onClick={onClick} {...commonProps}>{content}</button>;
 };
 
-export const SideDrawer: React.FC<SideDrawerProps> = ({ 
+export const SideDrawer: React.FC<SideDrawerProps> = ({
     isOpen, onClose, onOpenSettings, onUpgradeClick,
     projects, activeProjectId, onCreateNewProject, onDeleteProject, onRenameProject, onSwitchProject,
 }) => {
+  const { user } = useAuth0();
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
@@ -148,6 +150,23 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
           </div>
           
           <div className="flex-1 flex flex-col gap-8 py-5 px-4 overflow-y-auto">
+            {/* User Account Info */}
+            {user && (
+              <div className="border-b border-zinc-800 pb-4">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                    <span className="text-black font-semibold text-sm">
+                      {user.name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-sm font-medium text-white truncate">{user.name || 'User'}</h3>
+                    <p className="text-xs text-zinc-400 truncate">{user.email}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Project Section */}
             <div>
                 {isCreatingProject ? (
@@ -208,7 +227,6 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
           
           <div className="flex-shrink-0 p-4 border-t border-zinc-800">
             <div className="space-y-1">
-                <NavLink onClick={handleSubscriptionClick} icon={CreditCardIcon}>My Subscription</NavLink>
                 <NavLink onClick={handleSettingsClick} icon={SettingsIcon}>Settings</NavLink>
             </div>
           </div>

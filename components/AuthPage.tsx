@@ -58,7 +58,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onClose, onTryDemo }) => {
               <XIcon className="h-6 w-6" />
             </button>
             <div className="text-center">
-                <h2 className="text-3xl font-bold mb-4">Get Started</h2>
+                <h2 className="text-3xl font-bold mb-8">Get Started</h2>
 
                 <button
                   onClick={handleLogin}
