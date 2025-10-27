@@ -25,6 +25,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onClose, onTryDemo }) => {
       appState: {
         returnTo: window.location.pathname,
       },
+      authorizationParams: {
+        connection: 'google-oauth2',
+      },
     });
   };
 
