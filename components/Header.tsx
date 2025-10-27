@@ -62,22 +62,19 @@ export const Header: React.FC<HeaderProps> = ({
                         {INTEGRATIONS.map(integration => (
                             <div
                                 key={integration.id}
-                                className="flex items-start gap-3 p-3 text-sm rounded-md hover:bg-zinc-900 transition-colors cursor-pointer"
+                                className="p-3 text-sm rounded-md hover:bg-zinc-900 transition-colors cursor-pointer"
                             >
-                                <integration.icon className="w-6 h-6 text-zinc-400 mt-0.5 flex-shrink-0" />
-                                <div className="flex-1">
-                                    <p className="font-medium text-slate-200">{integration.name}</p>
-                                    <p className="text-xs text-zinc-400 mt-1">{integration.description}</p>
-                                    <a
-                                        href={integration.docsUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-2"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        View Documentation
-                                    </a>
-                                </div>
+                                <p className="font-medium text-slate-200">{integration.name}</p>
+                                <p className="text-xs text-zinc-400 mt-1">{integration.description}</p>
+                                <a
+                                    href={integration.docsUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-2"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    View Documentation
+                                </a>
                             </div>
                         ))}
                     </div>
