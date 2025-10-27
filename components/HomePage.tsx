@@ -133,11 +133,14 @@ export const HomePage: React.FC<HomePageProps> = ({ onLaunchWorkspace }) => {
                             >
                                 <span>Get Started</span>
                             </button>
-                            <button
+                             <button
                                 onClick={handleLearnMore}
                                 className="group inline-flex items-center justify-center gap-3 px-8 py-4 bg-zinc-800 text-white rounded-full hover:bg-zinc-700 border border-zinc-600 transition-colors font-semibold text-lg"
                             >
                                 <span>Learn More</span>
+                                <svg className="w-5 h-5 transition-transform group-hover:translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                </svg>
                             </button>
                         </div>
                     </div>

@@ -150,23 +150,6 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
           </div>
           
           <div className="flex-1 flex flex-col gap-8 py-5 px-4 overflow-y-auto">
-            {/* User Account Info */}
-            {user && (
-              <div className="border-b border-zinc-800 pb-4">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                    <span className="text-black font-semibold text-sm">
-                      {user.name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
-                    </span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-white truncate">{user.name || 'User'}</h3>
-                    <p className="text-xs text-zinc-400 truncate">{user.email}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Project Section */}
             <div>
                 {isCreatingProject ? (
@@ -226,8 +209,25 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
           </div>
           
           <div className="flex-shrink-0 p-4 border-t border-zinc-800">
-            <div className="space-y-1">
+            <div className="space-y-3">
                 <NavLink onClick={handleSettingsClick} icon={SettingsIcon}>Settings</NavLink>
+
+                {/* User Account Info */}
+                {user && (
+                  <div className="mt-6 pt-4 border-t border-zinc-800">
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-zinc-900/50 border border-zinc-800">
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                        <span className="text-black font-semibold text-sm">
+                          {user.name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-sm font-medium text-white truncate">{user.name || 'User'}</h3>
+                        <p className="text-xs text-zinc-400 truncate">{user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         </div>

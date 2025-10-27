@@ -9,7 +9,52 @@ import {
     SettingsAccountIcon,
     SettingsMemoryIcon,
 } from './icons/settings-icons';
+// Using available icon - we'll import what we need when we add API keys tab
 import type { SettingsTab } from '../types';
+
+// Custom hook for API key management
+const useApiKeyManagement = () => {
+  const [apiKey, setApiKey] = useState('');
+  const [savedApiKey, setSavedApiKey] = useState<string | null>(null);
+  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+
+  useEffect(() => {
+    const storedKey = localStorage.getItem('raone_gemini_api_key');
+    if (storedKey) {
+      setSavedApiKey(storedKey);
+      setApiKey('');
+    } else {
+      setShowApiKeyInput(true);
+    }
+  }, []);
+
+  const saveApiKey = () => {
+    if (apiKey.trim() && apiKey.trim().length === 39 && apiKey.trim().startsWith('AIza')) {
+      localStorage.setItem('raone_gemini_api_key', apiKey.trim());
+      setSavedApiKey(apiKey.trim());
+      setApiKey('');
+      setShowApiKeyInput(false);
+      return true;
+    }
+    return false;
+  };
+
+  const deleteApiKey = () => {
+    localStorage.removeItem('raone_gemini_api_key');
+    setSavedApiKey(null);
+    setShowApiKeyInput(true);
+  };
+
+  return {
+    apiKey,
+    setApiKey,
+    savedApiKey,
+    showApiKeyInput,
+    setShowApiKeyInput,
+    saveApiKey,
+    deleteApiKey,
+  };
+};
 
 interface SettingsPageProps {
   onClose: () => void;
@@ -46,9 +91,19 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
   const { user, isAuthenticated, logout } = useAuth0();
 
+  const {
+    apiKey,
+    setApiKey,
+    savedApiKey,
+    showApiKeyInput,
+    setShowApiKeyInput,
+    saveApiKey,
+    deleteApiKey,
+  } = useApiKeyManagement();
+
   const settingsTabs: { id: SettingsTab; label: string; icon: React.FC<{className?: string}> }[] = [
     { id: 'account', label: 'Account', icon: SettingsAccountIcon },
-    { id: 'subscription', label: 'Subscription', icon: CreditCardIcon },
+    { id: 'api-keys', label: 'API Keys', icon: CreditCardIcon }, // Using CreditCardIcon as placeholder
     { id: 'memory', label: 'Memory', icon: SettingsMemoryIcon },
   ];
 
@@ -137,6 +192,90 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({
                     >
                         Clear Chat History
                     </button>
+                </SettingsRow>
+            </>
+        );
+      case 'api-keys':
+        return (
+             <>
+                <SettingsHeader title="API Keys" description="Manage API keys for AI services used in your projects." />
+                <SettingsRow title="Gemini API Key" description="Your Google Gemini API key for AI-powered code generation. Only one key can be active at a time.">
+                    <div className="space-y-4">
+                        {savedApiKey ? (
+                            <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm font-medium text-green-400">API Key Active</p>
+                                        <p className="text-xs text-green-300 truncate font-mono">
+                                            AIza{'\u2026'}{savedApiKey.slice(-4)}
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={deleteApiKey}
+                                        className="px-3 py-1 text-xs font-medium text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                                    >
+                                        Delete Key
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {showApiKeyInput && (
+                                    <div className="space-y-2">
+                                        <input
+                                            type="text"
+                                            value={apiKey}
+                                            onChange={(e) => setApiKey(e.target.value)}
+                                            placeholder="Enter your Gemini API key (e.g., AIza...)"
+                                            className="w-full p-3 bg-zinc-900 border border-zinc-700 rounded-md text-white placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500/50 outline-none transition"
+                                        />
+                                        <div className="text-xs text-zinc-500">
+                                            Your API key will be stored locally and used only for AI code generation.
+                                            Get your key from{' '}
+                                            <a
+                                                href="https://makersuite.google.com/app/apikey"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-400 hover:text-blue-300 underline"
+                                            >
+                                                Google AI Studio
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
+                                <div className="flex gap-2">
+                                    {savedApiKey && (
+                                        <button
+                                            onClick={() => setShowApiKeyInput(true)}
+                                            className="px-4 py-2 text-sm font-medium border border-zinc-600 text-zinc-300 hover:bg-zinc-800 rounded-md transition-colors"
+                                        >
+                                            Change Key
+                                        </button>
+                                    )}
+                                    {showApiKeyInput && (
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={saveApiKey}
+                                                disabled={!apiKey.trim() || apiKey.length !== 39 || !apiKey.startsWith('AIza')}
+                                                className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white rounded-md transition-colors"
+                                            >
+                                                {savedApiKey ? 'Save New Key' : 'Save Key'}
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowApiKeyInput(false);
+                                                    setApiKey('');
+                                                }}
+                                                className="px-4 py-2 text-sm font-medium border border-zinc-600 text-zinc-300 hover:bg-zinc-800 rounded-md transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </SettingsRow>
             </>
         );

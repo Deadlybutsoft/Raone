@@ -571,9 +571,10 @@ export const useChat = (
 
       try {
         const streamPromise = (async () => {
-            const apiKey = 'AIzaSyDhgZ2LhGbB8uKohjHPzIp79TJg8YHERA0';
+            // Try to get API key from localStorage first, then fallback to environment/default
+            const apiKey = localStorage.getItem('raone_gemini_api_key') || 'AIzaSyDhgZ2LhGbB8uKohjHPzIp79TJg8YHERA0';
             if (!apiKey) {
-              throw new Error('Gemini API key is not configured.');
+              throw new Error('Gemini API key is not configured. Please set your API key in Settings > API Keys.');
             }
             const ai = new GoogleGenAI({ apiKey })
             const chatHistory = buildGeminiHistory(messages)

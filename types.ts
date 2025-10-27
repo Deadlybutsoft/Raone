@@ -46,4 +46,4 @@ export type IntegrationType =
     | 'auth0'
     | 'stripe';
 
-export type SettingsTab = 'account' | 'subscription' | 'memory';
+export type SettingsTab = 'account' | 'api-keys' | 'subscription' | 'memory';
