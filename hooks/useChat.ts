@@ -571,7 +571,11 @@ export const useChat = (
 
       try {
         const streamPromise = (async () => {
-            const ai = new GoogleGenAI({ apiKey: "AIzaSyB1HO26iQJFOEh4LT-HrPW0HtejIwFae4VU" })
+            const apiKey = (import.meta.env as any).VITE_GEMINI_API_KEY;
+            if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY') {
+              throw new Error('Gemini API key is not configured. Please set VITE_GEMINI_API_KEY in your environment variables.');
+            }
+            const ai = new GoogleGenAI({ apiKey })
             const chatHistory = buildGeminiHistory(messages)
             
             const promptParts: Part[] = imagesForNextTurn.map(image => ({
