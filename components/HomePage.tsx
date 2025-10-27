@@ -273,10 +273,10 @@ export const HomePage: React.FC<HomePageProps> = ({ onLaunchWorkspace }) => {
                         &copy; {new Date().getFullYear()} Raone. All rights reserved.
                     </p>
                     <div className="flex items-center gap-6 order-1 sm:order-2">
-                        <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">
+                        <a href="https://github.com/Deadlybutsoft/Raone" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">
                             <GithubIcon className="w-6 h-6" />
                         </a>
-                        <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">
+                        <a href="https://x.com/suvoiknow" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white transition-colors">
                             <TwitterIcon className="w-6 h-6" />
                         </a>
                     </div>
