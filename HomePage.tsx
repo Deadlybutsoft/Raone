@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthPage } from './components/AuthPage';
-import { ArrowRightIcon, SparklesIcon, DesktopIcon, DownloadIcon, GithubIcon, SuvoLogo, WandSparklesIcon, EyeIcon, RocketIcon, TwitterIcon } from './components/icons';
+import { AuthPage } from './AuthPage';
+import { ArrowRightIcon, SparklesIcon, DesktopIcon, DownloadIcon, GithubIcon, SuvoLogo, WandSparklesIcon, EyeIcon, RocketIcon, TwitterIcon } from './icons';
 
 // --- Animation Hook ---
 const useScrollAnimation = () => {
